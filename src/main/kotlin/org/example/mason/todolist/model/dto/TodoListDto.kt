@@ -5,3 +5,8 @@ data class TodoListDto (
     val task: String,
     val completed: Boolean
 )
+
+data class CreateTodoListDto(
+    val task: String,
+    val completed: Boolean = false
+)
