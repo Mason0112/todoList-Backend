@@ -4,6 +4,9 @@ import org.example.mason.todolist.model.dto.CreateTodoListDto
 import org.example.mason.todolist.model.dto.TodoListDto
 import org.example.mason.todolist.service.TodoListService
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.net.URI
@@ -13,20 +16,15 @@ import java.net.URI
 class TodoListController(private val todoListService: TodoListService) {
 
     @GetMapping
-    fun getAllTodos(): ResponseEntity<List<TodoListDto>> {
-        return ResponseEntity.ok(todoListService.getAllTodos())
-    }
-
-    @GetMapping("/{id}")
-    fun getTodoById(@PathVariable id: Long): ResponseEntity<TodoListDto> {
-        return todoListService.getTodoById(id)
-            ?.let { ResponseEntity.ok(it) }
-            ?: ResponseEntity.notFound().build()
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    fun getMyTodos(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<List<TodoListDto>> {
+        return ResponseEntity.ok(todoListService.getTodosForUser(userDetails.username))
     }
 
     @PostMapping
-    fun createTodo(@RequestBody createDto: CreateTodoListDto): ResponseEntity<TodoListDto> {
-        val createdTodo = todoListService.createTodo(createDto)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    fun createTodo(@RequestBody createDto: CreateTodoListDto, @AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<TodoListDto> {
+        val createdTodo = todoListService.createTodo(createDto, userDetails.username)
         val location: URI = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
@@ -36,18 +34,20 @@ class TodoListController(private val todoListService: TodoListService) {
     }
 
     @PutMapping("/{id}")
-    fun updateTodo(@PathVariable id: Long, @RequestBody todoDto: TodoListDto): ResponseEntity<TodoListDto> {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    fun updateTodo(@PathVariable id: Long, @RequestBody todoDto: TodoListDto, @AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<TodoListDto> {
         if (todoDto.id != id) {
             return ResponseEntity.badRequest().build()
         }
-        return todoListService.updateTodo(id, todoDto)
+        return todoListService.updateTodo(id, todoDto, userDetails.username)
             ?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.notFound().build()
     }
 
     @DeleteMapping("/{id}")
-    fun deleteTodo(@PathVariable id: Long): ResponseEntity<Void> {
-        todoListService.deleteTodo(id)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    fun deleteTodo(@PathVariable id: Long, @AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<Void> {
+        todoListService.deleteTodo(id, userDetails.username)
         return ResponseEntity.noContent().build()
     }
 }

@@ -3,6 +3,8 @@ package org.example.mason.todolist.model.entity
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 
@@ -15,5 +17,9 @@ data class TodoList(
 
     var task: String,
 
-    var completed: Boolean = false // 任務完成狀態，預設為 false (未完成)
+    var completed: Boolean = false, // 任務完成狀態，預設為 false (未完成)
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    var user: User
 )

@@ -1,5 +1,6 @@
 package org.example.mason.todolist.model.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -15,6 +16,7 @@ data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 自動產生 ID
     var id: Long? = null,
+    @Column(unique = true)
     var userName: String,
     var password: String,
     @Enumerated(EnumType.STRING)
