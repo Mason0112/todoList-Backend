@@ -12,8 +12,7 @@ fun TodoList.toDto(): TodoListDto {
     return TodoListDto(
         id = this.id!!,
         task = this.task,
-        completed = this.completed,
-        userId = this.user.id!!
+        completed = this.completed
     )
 }
 
