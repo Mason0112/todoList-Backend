@@ -1,16 +1,67 @@
-version: "3.7"
+version: "3.8"
+
 services:
+  # 1. 前端服務
+  frontend:
+    # 告訴 Docker 在 ./frontend 資料夾尋找 Dockerfile
+    build: ./frontend
+    networks:
+      - app-net
+
+  # 2. 後端服務
+  backend:
+    # 告訴 Docker 在 ./backend 資料夾尋找 Dockerfile
+    build: ./backend
+    # 後端應用程式運行的 port
+    ports:
+      - "8080"
+    networks:
+      - app-net
+    depends_on:
+      - mysqldb
+    environment:
+      # 使用服務名稱作為主機名稱，這是 Docker 網路的優勢
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/todolist
+      - SPRING_DATASOURCE_USERNAME=todolist
+      - SPRING_DATASOURCE_PASSWORD=abc123
+      - CORS_ALLOWED_ORIGINS=http://localhost:80 # 在開發環境中使用 Nginx 的 port
+      - JAVA_OPTS=-Xmx512m # 增加 Java 記憶體限制
+
+  # 3. 資料庫服務
   mysqldb:
     image: "mysql:8.0"
     restart: always
-    ports:
-      - 3306:3306
     networks:
-      - springapimysql-net
+      - app-net
     environment:
       MYSQL_DATABASE: todolist
-      MYSQL_USER: todoList
+      MYSQL_USER: todolist
       MYSQL_PASSWORD: abc123
       MYSQL_ROOT_PASSWORD: abc123
+    volumes:
+      - db-data:/var/lib/mysql
+
+  # 4. 反向代理服務
+  nginx:
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      # 將外部流量導向 Nginx 容器的 80 port
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-net
+    volumes:
+      # 將本機的 Nginx 設定檔掛載到容器內
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
+# 5. 定義網路和數據卷
 networks:
-  springapimysql-net:
+  app-net:
+    driver: bridge
+
+volumes:
+  db-data:

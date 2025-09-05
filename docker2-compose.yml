@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  mysqldb:
+    image: "mysql:8.0"
+    restart: always
+    ports:
+      - 3306:3306
+    networks:
+      - springapimysql-net
+    environment:
+      MYSQL_DATABASE: todolist
+      MYSQL_USER: todoList
+      MYSQL_PASSWORD: abc123
+      MYSQL_ROOT_PASSWORD: abc123
+networks:
+  springapimysql-net:
