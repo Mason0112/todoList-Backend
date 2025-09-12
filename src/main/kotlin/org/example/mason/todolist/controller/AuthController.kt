@@ -10,7 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -20,6 +22,14 @@ class AuthController(
     private val jwtTokenProvider: JwtTokenProvider,
     private val userService: UserService
 ) {
+
+
+    @GetMapping("/me")
+    fun getCurrentUser(@AuthenticationPrincipal principal: UserDetails): ResponseEntity<LoginResponseDto> {
+        val userDto = userService.getUserDtoByUsername(principal.username)
+        val loginResponse = LoginResponseDto(token = null, user = userDto)
+        return ResponseEntity.ok(loginResponse)
+    }
 
     @PostMapping("/login")
     fun authenticateUser(@RequestBody loginRequest: UserRegAndLoginDto): ResponseEntity<LoginResponseDto> {
@@ -53,15 +63,5 @@ class AuthController(
         return ResponseEntity(loginResponse, status)
     }
 
-    @GetMapping("/api/admin/dashboard")
-    @PreAuthorize("hasRole('ADMIN')") // 只有 ADMIN 角色的使用者才能呼叫
-    fun getAdminDashboard(): String {
-        return "Welcome to the Admin Dashboard!"
-    }
 
-    @GetMapping("/api/tasks")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')") // ADMIN 或 USER 都可以呼叫
-    fun getAllTasks(): String {
-        return "Here are all the tasks."
-    }
 }

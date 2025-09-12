@@ -6,7 +6,7 @@ data class UserRegAndLoginDto(
     val password: String
 )
 data class LoginResponseDto(
-    val token: String,
+    val token: String?,
     val user: UserDto
 )
 

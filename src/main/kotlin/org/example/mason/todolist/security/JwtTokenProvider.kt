@@ -5,6 +5,9 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import java.security.Key
@@ -21,8 +24,12 @@ class JwtTokenProvider(
         val now = Date()
         val expiryDate = Date(now.time + jwtExpirationInMs)
 
+        // 將角色添加到 JWT 的 claims 中
+        val claims = Jwts.claims().setSubject(userDetails.username)
+        claims["roles"] = userDetails.authorities.map { it.authority }
+
         return Jwts.builder()
-            .setSubject(userDetails.username)
+            .setClaims(claims)
             .setIssuedAt(now)
             .setExpiration(expiryDate)
             .signWith(key, SignatureAlgorithm.HS512)
@@ -39,5 +46,17 @@ class JwtTokenProvider(
         runCatching { Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token) }
             .onSuccess { return true }
         return false
+    }
+
+    fun getAuthentication(token: String): Authentication {
+        val claims: Claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).body
+
+        val username = claims.subject
+        val roles = claims["roles"] as? List<*> ?: emptyList<String>()
+
+        val authorities = roles.map { SimpleGrantedAuthority(it.toString()) }
+
+        // 建立 Authentication 物件
+        return UsernamePasswordAuthenticationToken(username, null, authorities)
     }
 }
