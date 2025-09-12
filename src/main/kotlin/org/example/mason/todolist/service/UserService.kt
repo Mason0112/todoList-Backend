@@ -38,4 +38,25 @@ class UserService(
             .orElseThrow { UsernameNotFoundException("User not found with username: $username") }
         return UserDto(id = user.id!!, userName = user.userName, role = user.role)
     }
+
+    /**
+     * Finds a user by their username.
+     * Used for JWT authentication where the user is already identified.
+     */
+    fun findByUsername(username: String): User? {
+        return userRepository.findByUserName(username).orElse(null)
+    }
+
+    /**
+     * Authenticates a user with a username and password.
+     * Used for initial login.
+     */
+    fun login(username: String, password: String): User? {
+        val user = findByUsername(username)
+        // Check if user exists and if the provided password matches the stored hashed password
+        if (user != null && passwordEncoder.matches(password, user.password)) {
+            return user
+        }
+        return null
+    }
 }
