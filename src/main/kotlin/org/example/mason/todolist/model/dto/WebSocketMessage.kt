@@ -10,6 +10,11 @@ data class WebSocketMessage(
     val sender: String?,
     val content: String?
 )
+data class WebSocketMessageJoin(
+    val type: MessageType,
+    val sender: String?,
+)
+
 
 // 私人訊息的資料結構
 data class PrivateChatMessage(

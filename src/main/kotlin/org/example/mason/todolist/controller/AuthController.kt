@@ -62,6 +62,4 @@ class AuthController(
         val loginResponse = LoginResponseDto(token = jwt, user = userDto)
         return ResponseEntity(loginResponse, status)
     }
-
-
 }
