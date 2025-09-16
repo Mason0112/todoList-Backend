@@ -11,7 +11,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-@Order(HIGHEST_PRECEDENCE + 50)
 class WebSocketConfig(
     private val authChannelInterceptor: AuthChannelInterceptor
 ) : WebSocketMessageBrokerConfigurer {

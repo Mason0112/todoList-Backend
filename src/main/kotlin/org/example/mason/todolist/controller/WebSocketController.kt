@@ -1,6 +1,5 @@
 package org.example.mason.todolist.controller
 
-import lombok.extern.slf4j.Slf4j
 import org.example.mason.todolist.model.dto.PrivateChatMessage
 import org.example.mason.todolist.model.dto.WebSocketMessage
 import org.example.mason.todolist.model.entity.User
@@ -8,12 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.handler.annotation.SendTo
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import java.security.Principal
-import java.util.UUID
+import java.util.*
 
 @Controller
 class WebSocketController {
@@ -27,7 +25,6 @@ class WebSocketController {
         @Payload message: WebSocketMessage,
         principal: Principal
     ): WebSocketMessage {
-        println("近來訊息")
         // 1. 將 Principal 轉型，取得我們需要的 Authentication 物件
         val auth = principal as Authentication
         // 2. 從 Authentication 物件中取得 UserEntity
